@@ -25,6 +25,7 @@
     "react-router-dom": "^4.2.2",
     "react-tap-event-plugin": "^3.0.2",
     "socket.io": "^2.0.4",
+    "styled-components": "^3.1.6",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1"
   },

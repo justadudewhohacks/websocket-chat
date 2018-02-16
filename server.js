@@ -6,7 +6,7 @@ server.listen(3000, function(err) {
   console.log('listening on port 3000')
 })
 
-function createChatroom(name) {
+function createChatroom({ name, image }) {
   const members = new Set()
 
   function broadcast(code, msg) {
@@ -18,11 +18,11 @@ function createChatroom(name) {
       )
   }
 
-  return { name, members, broadcast }
+  return { name, image, members, broadcast }
 }
 
 const chatrooms = new Map(
-  require('./config/chatrooms').map((chatroom, id) => [id, createChatroom(chatroom.name)])
+  require('./config/chatrooms').map((chatroom, id) => [id, createChatroom(chatroom)])
 )
 
 const users = require('./config/users')
@@ -41,6 +41,11 @@ function isUserAvailable(userName) {
 
 function getUser(userName) {
   return users.find(u => u.name === userName)
+}
+
+function getChatrooms() {
+  return Array.from(chatrooms.values())
+    .map(c => ({ name: c.name, image: c.image, numMembers: c.members.size }))
 }
 
 io.on('connection', function(client) {
@@ -110,7 +115,7 @@ io.on('connection', function(client) {
   })
 
   client.on('chatrooms', function(_, callback) {
-    return callback(null, Array.from(chatrooms.values()))
+    return callback(null, getChatrooms())
   })
 
   client.on('availableUsers', function(_, callback) {

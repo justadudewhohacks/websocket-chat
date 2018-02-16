@@ -1,23 +1,16 @@
 import React from 'react';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-import { BrowserRouter, Route, Switch, Redirect, Link } from 'react-router-dom';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
-import Loader from './Loader'
+import AppWrapper from './AppWrapper';
+import Home from './Home';
+import Loader from './Loader';
 import UserSelection from './UserSelection';
-import socket from './socket'
+import socket from './socket';
 
 injectTapEventPlugin()
 
-const Navbar = () => (
-  <ul>
-    <li> <Link to="/"> { 'Home' } </Link> </li>
-    <li> <Link to="/1"> { 'Chatroom 1' } </Link> </li>
-    <li> <Link to="/2"> { 'Chatroom 2' } </Link> </li>
-  </ul>
-)
-
-const Home = () => <h1> { 'Home' } </h1>
 const Chatroom = props => <h1> { `$Chatroom ${props.id} ${props.name}`} </h1>
 
 export default class Root extends React.Component {
@@ -66,7 +59,7 @@ export default class Root extends React.Component {
 
   renderChatroomOrRedirect(renderChatroom) {
     return !this.state.user
-      ? <Redirect to="/register" />
+      ? <Redirect to="/user" />
       : renderChatroom()
   }
 
@@ -74,21 +67,28 @@ export default class Root extends React.Component {
     return (
       <BrowserRouter>
         <MuiThemeProvider>
-          {
-            !this.state.chatrooms
-              ? <Loader />
-              : (
-                <div>
-                  <Navbar />
+          <AppWrapper>
+            {
+              !this.state.chatrooms
+                ? <Loader />
+                : (
                   <Switch>
                     <Route
                       exact
                       path="/"
-                      component={Home}
+                      render={
+                        props => (
+                          <Home
+                            user={this.state.user}
+                            chatrooms={this.state.chatrooms}
+                            onChangeUser={() => props.history.push('/user')}
+                          />
+                        )
+                      }
                     />
                     <Route
                       exact
-                      path="/register"
+                      path="/user"
                       render={
                         (props) => {
                           const toHome = () => props.history.push('/')
@@ -113,9 +113,9 @@ export default class Root extends React.Component {
                       render={() => this.renderChatroomOrRedirect(() => <Chatroom id="2" />)}
                     />
                   </Switch>
-                </div>
-              )
-          }
+                )
+            }
+          </AppWrapper>
         </MuiThemeProvider>
       </BrowserRouter>
     )
