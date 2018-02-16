@@ -1,0 +1,38 @@
+{
+  "name": "twd-websocket-chat",
+  "version": "0.0.0",
+  "description": "Example group chat app built with socket.io and react.",
+  "scripts": {
+    "server": "node server.js",
+    "client": "webpack-dev-server"
+  },
+  "keywords": [
+    "websocket",
+    "socket",
+    "chat"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "material-ui": "^0.20.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-hot-loader": "^3.1.3",
+    "react-router-dom": "^4.2.2",
+    "react-tap-event-plugin": "^3.0.2",
+    "socket.io": "^2.0.4",
+    "webpack": "^3.11.0",
+    "webpack-dev-server": "^2.11.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.17.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.6.1"
+  }
+}
