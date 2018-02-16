@@ -1,26 +1,45 @@
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import TextField from 'material-ui/TextField';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
+
+import Loader from './Loader'
 
 export default class UserSelection extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      input: ''
+      selectedUser: null,
+      availableUsers: null
     }
 
-    this.handleInput = this.handleInput.bind(this)
+    this.handleSelection = this.handleSelection.bind(this)
     this.handleOk = this.handleOk.bind(this)
+    this.renderUserItems = this.renderUserItems.bind(this)
+
+    this.props.getAvailableUsers((err, availableUsers) => {
+      this.setState({ availableUsers })
+    })
   }
 
-  handleInput(e) {
-    this.setState({ input: e.target.value })
+  handleSelection(event, index, selectedUser) {
+    this.setState({ selectedUser })
   }
-
 
   handleOk() {
-    this.props.register(this.state.input)
+    this.props.register(this.state.selectedUser)
+  }
+
+  renderUserItems() {
+    return this.state.availableUsers.map(user => (
+      <MenuItem
+        value={user.name}
+        key={user.name}
+        primaryText={user.name}
+        leftIcon={<img source={user.image} alt="" />}
+      />
+    ))
   }
 
   render() {
@@ -46,12 +65,19 @@ export default class UserSelection extends React.Component {
         open
         onRequestClose={this.props.close}
       >
-        <TextField
-          hintText="Enter your name."
-          floatingLabelText="Enter your name."
-          value={this.state.input}
-          onChange={this.handleInput}
-        />
+        {
+          !this.state.availableUsers
+            ? <Loader />
+            : (
+              <SelectField
+                value={this.state.selectedUser}
+                onChange={this.handleSelection}
+                maxHeight={200}
+              >
+                { this.renderUserItems() }
+              </SelectField>
+            )
+        }
       </Dialog>
     )
   }

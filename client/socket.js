@@ -44,6 +44,14 @@ export default function(args) {
       socket.emit('message', { chatroomId, message }, cb)
   }
 
-  return { register, join, leave, message, setConnectedCb, setUserJoinedCb, setUserLeftCb }
+  function getChatrooms(cb) {
+    socket.emit('chatrooms', null, cb)
+  }
+
+  function getAvailableUsers(cb) {
+    socket.emit('availableUsers', null, cb)
+  }
+
+  return { register, join, leave, message, getChatrooms, getAvailableUsers, setConnectedCb, setUserJoinedCb, setUserLeftCb }
 }
 

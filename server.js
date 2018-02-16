@@ -6,13 +6,12 @@ server.listen(3000, function(err) {
   console.log('listening on port 3000')
 })
 
-function createChatroom(chatroomId) {
-  const name = `Chatroom ${chatroomId}`
+function createChatroom(name) {
   const members = new Set()
 
   function broadcast(code, msg) {
     Array.from(members)
-      .map(clientId => users.get(clientId))
+      .map(clientId => clients.get(clientId))
       .filter(c => !!c)
       .forEach(
         m => m.client.emit(code, msg)
@@ -23,28 +22,45 @@ function createChatroom(chatroomId) {
 }
 
 const chatrooms = new Map(
-  [1, 2].map(id => [id, createChatroom(id)])
+  require('./config/chatrooms').map((chatroom, id) => [id, createChatroom(chatroom.name)])
 )
 
-const users = new Map()
+const users = require('./config/users')
+
+const clients = new Map()
+
+function getAvailableUsers() {
+  const usersTaken = new Set(Array.from(clients.values()).filter(c => c.user).map(c => c.user.name))
+  return users
+    .filter(u => !usersTaken.has(u.name))
+}
+
+function isUserAvailable(userName) {
+  return getAvailableUsers().some(u => u.name === userName)
+}
+
+function getUser(userName) {
+  return users.find(u => u.name === userName)
+}
 
 io.on('connection', function(client) {
   console.log('client connected...', client.id)
-  users.set(client.id, { client })
+  clients.set(client.id, { client })
 
-  client.on('register', function(name, callback) {
-    if (!name)
-        return callback('empty name')
+  client.on('register', function(userName, callback) {
+    if (!isUserAvailable(userName))
+      return callback('user is not available')
 
-    users.set(client.id, { client, name })
+    const user = getUser(userName)
+    clients.set(client.id, { client, user })
 
-    return callback(null)
+    return callback(null, user)
   })
 
   client.on('join', function(chatroomId, cb) {
-    const user = users.get(client.id)
-    if (!user || !user.name) {
-      return callback('not registered')
+    const c = clients.get(client.id)
+    if (!c || !c.user) {
+      return callback('select user first')
     }
 
     const chatroom = chatrooms.get(chatroomId)
@@ -55,7 +71,7 @@ io.on('connection', function(client) {
       return callback(null)
 
     // notify other clients in chatroom
-    chatroom.broadcast('joined', { chat: chatroom.name, user: user.name })
+    chatroom.broadcast('joined', { chat: chatroom.name, user: c.user.name })
 
     // add member to chatroom
     chatroom.members.add(client.id)
@@ -72,7 +88,7 @@ io.on('connection', function(client) {
       return callback(null)
 
     // notify other clients in chatroom
-    chatroom.broadcast('left', { chat: chatroom.name, user: users.get(client.id).name })
+    chatroom.broadcast('left', { chat: chatroom.name, user: clients.get(client.id).user.name })
 
     // remove member from chatroom
     chatroom.members.delete(client.id)
@@ -93,10 +109,18 @@ io.on('connection', function(client) {
     return callback(null)
   })
 
+  client.on('chatrooms', function(_, callback) {
+    return callback(null, Array.from(chatrooms.values()))
+  })
+
+  client.on('availableUsers', function(_, callback) {
+    return callback(null, getAvailableUsers())
+  })
+
   client.on('disconnect', function() {
     console.log('client disconnect...', client.id)
     // remove user profile
-    users.delete(client.id)
+    clients.delete(client.id)
     // remove member from all chatrooms
     chatrooms.forEach(c => c.members.delete(client.id))
   })
