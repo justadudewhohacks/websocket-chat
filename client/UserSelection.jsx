@@ -1,8 +1,8 @@
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
+import { List, ListItem } from 'material-ui/List';
+import Avatar from 'material-ui/Avatar';
 
 import Loader from './Loader'
 
@@ -10,12 +10,10 @@ export default class UserSelection extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      selectedUser: null,
       availableUsers: null
     }
 
     this.handleSelection = this.handleSelection.bind(this)
-    this.handleOk = this.handleOk.bind(this)
     this.renderUserItems = this.renderUserItems.bind(this)
 
     this.props.getAvailableUsers((err, availableUsers) => {
@@ -23,21 +21,18 @@ export default class UserSelection extends React.Component {
     })
   }
 
-  handleSelection(event, index, selectedUser) {
-    this.setState({ selectedUser })
-  }
-
-  handleOk() {
-    this.props.register(this.state.selectedUser)
+  handleSelection(selectedUser) {
+    this.props.register(selectedUser.name)
   }
 
   renderUserItems() {
     return this.state.availableUsers.map(user => (
-      <MenuItem
-        value={user.name}
-        key={user.name}
+      <ListItem
+        onClick={() => this.handleSelection(user)}
         primaryText={user.name}
-        leftIcon={<img source={user.image} alt="" />}
+        secondaryText={user.statusText}
+        key={user.name}
+        leftAvatar={<Avatar src={user.image} alt="" />}
       />
     ))
   }
@@ -48,18 +43,12 @@ export default class UserSelection extends React.Component {
         label="Cancel"
         primary
         onClick={this.props.close}
-      />,
-      <FlatButton
-        label="Submit"
-        primary
-        keyboardFocused
-        onClick={this.handleOk}
       />
     ]
 
     return (
       <Dialog
-        title="What's your name?"
+        title="Pick your character."
         actions={actions}
         modal={false}
         open
@@ -69,13 +58,9 @@ export default class UserSelection extends React.Component {
           !this.state.availableUsers
             ? <Loader />
             : (
-              <SelectField
-                value={this.state.selectedUser}
-                onChange={this.handleSelection}
-                maxHeight={200}
-              >
+              <List>
                 { this.renderUserItems() }
-              </SelectField>
+              </List>
             )
         }
       </Dialog>

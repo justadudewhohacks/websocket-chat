@@ -1,5 +1,5 @@
 {
-  "name": "twd-websocket-chat",
+  "name": "websocket-chat",
   "version": "0.0.0",
   "description": "Example group chat app built with socket.io and react.",
   "scripts": {
@@ -11,7 +11,7 @@
     "socket",
     "chat"
   ],
-  "author": "",
+  "author": "justadudewhohacks",
   "license": "MIT",
   "dependencies": {
     "babel-core": "^6.26.0",
