@@ -8,14 +8,41 @@ import Avatar from 'material-ui/Avatar';
 import Divider from 'material-ui/Divider';
 import { List, ListItem } from 'material-ui/List';
 
-const ChatPanel = styled.div`
+import Overlay from './Overlay';
+
+const ChatWindow = styled.div`
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   justify-content: flex-end;
-  background: #fafafa;
   height: 100%;
   width: 420px;
   box-sizing: border-box;
+`
+const ChatPanel = styled.div`
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1;
+`
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 20px ;
+  z-index: 1;
+  color: #fafafa !important;
+  border-bottom: 1px solid;
+`
+
+const Title = styled.p`
+  text-align: center;
+  font-size: 24px;
 `
 
 const NoDots = styled.div`
@@ -30,6 +57,7 @@ const OutputText = styled.div`
   overflow: initial !important;
   width: 100%;
   height: auto !important;
+  color: #fafafa !important;
 `
 
 const InputPanel = styled.div`
@@ -37,6 +65,12 @@ const InputPanel = styled.div`
   align-items: center;
   padding: 20px;
   align-self: center;
+`
+
+const ChatroomImage = styled.img`
+  position: absolute;
+  top: 0;
+  width: 100%;
 `
 
 export default class Chatroom extends React.Component {
@@ -108,56 +142,83 @@ export default class Chatroom extends React.Component {
 
   render() {
     return (
-      <div style={{height: '100%'}}>
-        <RaisedButton
-          label="Leave"
-          onClick={this.props.onLeave}
-        />
-        <ChatPanel ref={(panel) => { this.panel = panel; }}>
-          <List style={{height: '100%', overflow: 'auto'}}>
-            {
-              this.state.chatHistory.map(
-                ({ user, message }) => [
-                  <NoDots>
-                    <ListItem
-                      leftAvatar={<Avatar src={user.image} />}
-                      primaryText={user.name}
-                      secondaryText={
-                        <OutputText>
-                          {message}
-                        </OutputText>
-
-                      }
-                    />
-                  </NoDots>,
-                  <Divider inset />
-                ]
-              )
-            }
-          </List>
-          <InputPanel>
-            <TextField
-              hintText="Enter a message."
-              floatingLabelText="Enter a message."
-              multiLine
-              rows={4}
-              rowsMax={4}
-              onChange={this.onInput}
-              value={this.state.input}
+      <div style={{ height: '100%' }}>
+        <ChatWindow ref={(panel) => { this.panel = panel; }}>
+          <Header>
+            <Title>
+              { this.props.chatroom.name }
+            </Title>
+            <RaisedButton
+              primary
+              icon={
+                <FontIcon
+                  style={{ fontSize: 24 }}
+                  className="material-icons"
+                >
+                  {'close'}
+                </FontIcon>
+              }
+              onClick={this.props.onLeave}
             />
-            <FloatingActionButton
-              onClick={this.onSendMessage}
-              style={{ marginLeft: 20 }}
-            >
-              <FontIcon
-                style={{ fontSize: 32 }}
-                className="material-icons"
+          </Header>
+          <ChatroomImage
+            src={this.props.chatroom.image}
+            alt=""
+          />
+          <ChatPanel>
+            <List style={{ height: '100%', overflow: 'auto' }}>
+              {
+                this.state.chatHistory.map(
+                  ({ user, message }) => [
+                    <NoDots>
+                      <ListItem
+                        style={{ color: '#fafafa' }}
+                        leftAvatar={<Avatar src={user.image} />}
+                        primaryText={user.name}
+                        secondaryText={
+                          <OutputText>
+                            { message }
+                          </OutputText>
+
+                        }
+                      />
+                    </NoDots>,
+                    <Divider inset />
+                  ]
+                )
+              }
+            </List>
+            <InputPanel>
+              <TextField
+                textareaStyle={{ color: '#fafafa' }}
+                hintStyle={{ color: '#fafafa' }}
+                floatingLabelStyle={{ color: '#fafafa' }}
+                hintText="Enter a message."
+                floatingLabelText="Enter a message."
+                multiLine
+                rows={4}
+                rowsMax={4}
+                onChange={this.onInput}
+                value={this.state.input}
+              />
+              <FloatingActionButton
+                onClick={this.onSendMessage}
+                style={{ marginLeft: 20 }}
               >
-                {'chat_bubble_outline'}
-              </FontIcon>
-            </FloatingActionButton>
-          </InputPanel>
-        </ChatPanel>
+                <FontIcon
+                  style={{ fontSize: 32 }}
+                  className="material-icons"
+                >
+                  {'chat_bubble_outline'}
+                </FontIcon>
+              </FloatingActionButton>
+            </InputPanel>
+          </ChatPanel>
+          <Overlay
+            opacity={0.6}
+            background="#111111"
+          />
+        </ChatWindow>
       </div>
     )
   }

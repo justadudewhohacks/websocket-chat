@@ -47,6 +47,9 @@ cursor: pointer;
   a {
     text-decoration: none;
   }
+  img {
+    box-shadow: rgba(255, 255, 255, 0.2) 0 0 10px 2px;
+  }
 `
 
 const Relative = styled.div`
@@ -80,7 +83,7 @@ function renderAvatar(user) {
 }
 
 function fullName(user) {
-  return user && `${user.name} ${user.lastName}`
+  return user ? `${user.name} ${user.lastName}` : 'Who are you?'
 }
 
 export default ({ children, user }) => (
@@ -105,7 +108,7 @@ export default ({ children, user }) => (
     <FullScreen>
       <BackgroundImage src="background.jpg" />
       <Overlay
-        opacity={0.8}
+        opacity={0.4}
         background="#212121"
       />
     </FullScreen>
