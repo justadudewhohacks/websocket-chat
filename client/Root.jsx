@@ -108,7 +108,9 @@ export default class Root extends React.Component {
     return (
       <BrowserRouter>
         <MuiThemeProvider>
-          <MainLayout user={this.state.user}>
+          <MainLayout
+            user={this.state.user}
+          >
             {
               !this.state.chatrooms
                 ? <Loader />

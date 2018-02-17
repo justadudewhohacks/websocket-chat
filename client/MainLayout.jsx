@@ -14,15 +14,22 @@ const ContentWrapper = styled.div`
   overflow: auto;
   z-index: 1;
 `
+const Center = styled.div`
+  position: relative;
+  max-width: 1000px;
+  margin: auto;
+  padding: 40px 0;
+  height: 100%;
+  box-sizing: border-box;
+`
 
 const Content = styled.div`
   position: relative;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  max-width: 1000px;
-  margin: auto;
-  margin-top: 40px;
+  margin: 0 20px;
+  height: 100%;
 `
 
 const BackgroundImage = styled.div`
@@ -33,11 +40,27 @@ const BackgroundImage = styled.div`
 `
 
 const AvatarWrapper = styled.div`
-  cursor: pointer;
-  margin: 0 20px;
+cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   a {
     text-decoration: none;
   }
+`
+
+const Relative = styled.div`
+  position: relative;
+`
+
+const Sticky = styled.div`
+  position: fixed;
+`
+const UserName = styled.p`
+  font-size: 24px;
+  height: 27px;
+  text-align: center;
+  color: #fafafa;
 `
 
 function renderAvatar(user) {
@@ -56,17 +79,28 @@ function renderAvatar(user) {
   return <Avatar size={160} {...props} />
 }
 
+function fullName(user) {
+  return user && `${user.name} ${user.lastName}`
+}
+
 export default ({ children, user }) => (
   <FullScreen>
     <ContentWrapper>
-      <Content>
-        <AvatarWrapper>
-          <Link to="/user">
-            { renderAvatar(user) }
-          </Link>
-        </AvatarWrapper>
-        { children }
-      </Content>
+      <Center>
+        <Content>
+          <Relative>
+            <Sticky>
+              <AvatarWrapper>
+                <Link to="/user">
+                  { renderAvatar(user) }
+                </Link>
+                <UserName> { fullName(user) } </UserName>
+              </AvatarWrapper>
+            </Sticky>
+          </Relative>
+          { children }
+        </Content>
+      </Center>
     </ContentWrapper>
     <FullScreen>
       <BackgroundImage src="background.jpg" />
