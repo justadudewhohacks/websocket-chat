@@ -1,34 +1,36 @@
 import React from 'react';
+import styled from 'styled-components'
 import Paper from 'material-ui/Paper';
 import { Card, CardMedia, CardTitle } from 'material-ui/Card';
-import RaisedButton from 'material-ui/RaisedButton';
+
+
+const Wrapper = styled.div`
+  cursor: pointer;
+`
 
 const getCardTitleStyle = () => ({
   display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between'
+  alignItems: 'center'
 })
 
-export default ({ chatroom }) => (
+export default ({ chatroom, onEnter }) => (
   <Paper
-    style={{ maxWidth: 600, margin: 20 }}
+    style={{ maxWidth: 600, marginBottom: 40 }}
     zDepth={5}
   >
-    <Card>
-      <CardMedia
-        overlay={
-          <CardTitle
-            title={chatroom.name}
-            style={getCardTitleStyle()}
-          >
-            <RaisedButton
-              label="Join"
+    <Wrapper onClick={onEnter}>
+      <Card>
+        <CardMedia
+          overlay={
+            <CardTitle
+              title={chatroom.name}
+              style={getCardTitleStyle()}
             />
-          </CardTitle>
-        }
-      >
-        <img height="100%" src={chatroom.image} alt="" />
-      </CardMedia>
-    </Card>
+          }
+        >
+          <img height="100%" src={chatroom.image} alt="" />
+        </CardMedia>
+      </Card>
+    </Wrapper>
   </Paper>
 )

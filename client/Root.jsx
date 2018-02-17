@@ -3,15 +3,14 @@ import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
-import AppWrapper from './AppWrapper';
+import MainLayout from './MainLayout';
 import Home from './Home';
 import Loader from './Loader';
 import UserSelection from './UserSelection';
+import Chatroom from './Chatroom';
 import socket from './socket';
 
 injectTapEventPlugin()
-
-const Chatroom = props => <h1> { `$Chatroom ${props.id} ${props.name}`} </h1>
 
 export default class Root extends React.Component {
   constructor(props, context) {
@@ -24,22 +23,32 @@ export default class Root extends React.Component {
       chatrooms: null
     }
 
+    this.onEnterChatroom = this.onEnterChatroom.bind(this)
+    this.onLeaveChatroom = this.onLeaveChatroom.bind(this)
     this.getChatrooms = this.getChatrooms.bind(this)
     this.register = this.register.bind(this)
-    this.renderChatroomOrRedirect = this.renderChatroomOrRedirect.bind(this)
-    this.onEnterUserSelection = this.onEnterUserSelection.bind(this)
+    this.renderUserSelectionOrRedirect = this.renderUserSelectionOrRedirect.bind(this)
 
     this.getChatrooms()
   }
 
-  onEnterUserSelection(renderUserSelection) {
-    if (this.state.user) {
-      return <Redirect to="/" />
-    }
+  onEnterChatroom(chatroomName, onNoUserSelected, onEnterSuccess) {
+    if (!this.state.user)
+      return onNoUserSelected()
 
-    return this.state.isRegisterInProcess
-      ? <Loader />
-      : renderUserSelection()
+    return this.state.client.join(chatroomName, (err) => {
+      if (err)
+        return console.error(err)
+      return onEnterSuccess()
+    })
+  }
+
+  onLeaveChatroom(chatroomName, onLeaveSuccess) {
+    this.state.client.leave(chatroomName, (err) => {
+      if (err)
+        return console.error(err)
+      return onLeaveSuccess()
+    })
   }
 
   getChatrooms() {
@@ -57,17 +66,49 @@ export default class Root extends React.Component {
     })
   }
 
-  renderChatroomOrRedirect(renderChatroom) {
-    return !this.state.user
-      ? <Redirect to="/user" />
-      : renderChatroom()
+  renderUserSelectionOrRedirect(renderUserSelection) {
+    if (this.state.user) {
+      return <Redirect to="/" />
+    }
+
+    return this.state.isRegisterInProcess
+      ? <Loader />
+      : renderUserSelection()
+  }
+
+  renderChatroomOrRedirect(chatroom, { history }) {
+    if (!this.state.user) {
+      return <Redirect to="/" />
+    }
+
+    return (
+      <Chatroom
+        chatroom={chatroom}
+        user={this.state.user}
+        onLeave={
+          () => this.onLeaveChatroom(
+            chatroom.name,
+            () => history.push('/')
+          )
+        }
+        onSendMessage={
+          (message, cb) => this.state.client.message(
+            chatroom.name,
+            message,
+            cb
+          )
+        }
+        registerHandlers={this.state.client.registerHandlers}
+        unregisterHandlers={this.state.client.unregisterHandlers}
+      />
+    )
   }
 
   render() {
     return (
       <BrowserRouter>
         <MuiThemeProvider>
-          <AppWrapper>
+          <MainLayout user={this.state.user}>
             {
               !this.state.chatrooms
                 ? <Loader />
@@ -82,6 +123,13 @@ export default class Root extends React.Component {
                             user={this.state.user}
                             chatrooms={this.state.chatrooms}
                             onChangeUser={() => props.history.push('/user')}
+                            onEnterChatroom={
+                              chatroomName => this.onEnterChatroom(
+                                chatroomName,
+                                () => props.history.push('/user'),
+                                () => props.history.push(chatroomName)
+                              )
+                            }
                           />
                         )
                       }
@@ -92,7 +140,7 @@ export default class Root extends React.Component {
                       render={
                         (props) => {
                           const toHome = () => props.history.push('/')
-                          return this.onEnterUserSelection(() => (
+                          return this.renderUserSelectionOrRedirect(() => (
                             <UserSelection
                               getAvailableUsers={this.state.client.getAvailableUsers}
                               close={toHome}
@@ -102,20 +150,22 @@ export default class Root extends React.Component {
                         }
                       }
                     />
-                    <Route
-                      exact
-                      path="/1"
-                      render={() => this.renderChatroomOrRedirect(() => <Chatroom id="1" />)}
-                    />
-                    <Route
-                      exact
-                      path="/2"
-                      render={() => this.renderChatroomOrRedirect(() => <Chatroom id="2" />)}
-                    />
+                    {
+                      this.state.chatrooms.map(chatroom => (
+                        <Route
+                          key={chatroom.name}
+                          exact
+                          path={`/${chatroom.name}`}
+                          render={
+                            props => this.renderChatroomOrRedirect(chatroom, props)
+                          }
+                        />
+                      ))
+                    }
                   </Switch>
                 )
             }
-          </AppWrapper>
+          </MainLayout>
         </MuiThemeProvider>
       </BrowserRouter>
     )

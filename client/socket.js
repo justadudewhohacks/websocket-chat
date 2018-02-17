@@ -1,29 +1,25 @@
 const io = require('socket.io-client')
 
-export default function(args) {
+export default function () {
   const socket = io.connect('http://localhost:3000')
 
-  let connected = function() {}
-  let userJoined = function() {}
-  let userLeft = function() {}
-
-  function setConnectedCb(cb) {
-    connected = cb
+  function registerHandlers({
+    onUserJoined,
+    onUserLeft,
+    onMessageReceived
+  }) {
+    socket.on('userJoined', onUserJoined)
+    socket.on('userLeft', onUserLeft)
+    socket.on('message', onMessageReceived)
   }
 
-  function setUserJoinedCb(cb) {
-    userJoined = cb
+  function unregisterHandlers() {
+    socket.off('userJoined')
+    socket.off('userLeft')
+    socket.off('message')
   }
 
-  function setUserLeftCb(cb) {
-    userLeft = cb
-  }
-
-  socket.on('connected', connected)
-  socket.on('userJoined', userJoined)
-  socket.on('userLeft', userLeft)
-
-  socket.on('error', function(err) {
+  socket.on('error', function (err) {
     console.log('received socket error:')
     console.log(err)
   })
@@ -32,16 +28,16 @@ export default function(args) {
     socket.emit('register', name, cb)
   }
 
-  function join(chatroomId, cb) {
-    socket.emit('join', chatroomId, cb)
+  function join(chatroomName, cb) {
+    socket.emit('join', chatroomName, cb)
   }
 
-  function leave(chatroomId, cb) {
-      socket.emit('leave', chatroomId, cb)
+  function leave(chatroomName, cb) {
+    socket.emit('leave', chatroomName, cb)
   }
 
-  function message(chatroomId, message, cb) {
-      socket.emit('message', { chatroomId, message }, cb)
+  function message(chatroomName, msg, cb) {
+    socket.emit('message', { chatroomName, message: msg }, cb)
   }
 
   function getChatrooms(cb) {
@@ -52,6 +48,15 @@ export default function(args) {
     socket.emit('availableUsers', null, cb)
   }
 
-  return { register, join, leave, message, getChatrooms, getAvailableUsers, setConnectedCb, setUserJoinedCb, setUserLeftCb }
+  return {
+    register,
+    join,
+    leave,
+    message,
+    getChatrooms,
+    getAvailableUsers,
+    registerHandlers,
+    unregisterHandlers
+  }
 }
 
