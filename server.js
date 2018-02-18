@@ -81,7 +81,7 @@ io.on('connection', function (client) {
       return callback('invalid chatroom id')
 
     // notify other clients in chatroom
-    chatroom.broadcast('userJoined', { chat: chatroom.name, user: c.user.name })
+    chatroom.broadcast('userJoined', { chat: chatroom.name, user: c.user })
 
     // add member to chatroom
     chatroom.members.add(client.id)

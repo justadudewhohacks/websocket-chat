@@ -65,12 +65,18 @@ const InputPanel = styled.div`
   align-items: center;
   padding: 20px;
   align-self: center;
+  border-top: 1px solid #fafafa;
 `
 
 const ChatroomImage = styled.img`
   position: absolute;
   top: 0;
   width: 100%;
+`
+
+const Scrollable = styled.div`
+  height: 100%;
+  overflow: auto;
 `
 
 export default class Chatroom extends React.Component {
@@ -87,6 +93,7 @@ export default class Chatroom extends React.Component {
     this.onUserJoined = this.onUserJoined.bind(this)
     this.onUserLeft = this.onUserLeft.bind(this)
     this.onMessageReceived = this.onMessageReceived.bind(this)
+    this.updateChatHistory = this.updateChatHistory.bind(this)
   }
 
   componentDidMount() {
@@ -101,6 +108,10 @@ export default class Chatroom extends React.Component {
       onUserLeft,
       onMessageReceived
     })
+  }
+
+  componentDidUpdate() {
+    this.panel.scrollTo(0, this.panel.scrollHeight)
   }
 
   componentWillUnmount() {
@@ -123,27 +134,27 @@ export default class Chatroom extends React.Component {
   }
 
   onUserJoined({ user }) {
-    console.log('user joined:', user)
+    this.updateChatHistory({ user, event: `joined ${this.props.chatroom.name}` })
   }
 
   onUserLeft({ user }) {
     console.log('user left:', user)
+    this.updateChatHistory({ user, event: `left ${this.props.chatroom.name}` })
   }
 
   onMessageReceived({ user, message }) {
     console.log('onMessageReceived:', user, message)
-    this.setState({ chatHistory: this.state.chatHistory.concat({ user, message }) })
+    this.updateChatHistory({ user, message })
   }
 
-  componentDidUpdate() {
-    console.log(this.panel)
-    //foo.scrollTo(0, foo.scrollHeight)
+  updateChatHistory(entry) {
+    this.setState({ chatHistory: this.state.chatHistory.concat(entry) })
   }
 
   render() {
     return (
       <div style={{ height: '100%' }}>
-        <ChatWindow ref={(panel) => { this.panel = panel; }}>
+        <ChatWindow>
           <Header>
             <Title>
               { this.props.chatroom.name }
@@ -166,28 +177,30 @@ export default class Chatroom extends React.Component {
             alt=""
           />
           <ChatPanel>
-            <List style={{ height: '100%', overflow: 'auto' }}>
-              {
-                this.state.chatHistory.map(
-                  ({ user, message }) => [
-                    <NoDots>
-                      <ListItem
-                        style={{ color: '#fafafa' }}
-                        leftAvatar={<Avatar src={user.image} />}
-                        primaryText={user.name}
-                        secondaryText={
-                          <OutputText>
-                            { message }
-                          </OutputText>
-
-                        }
-                      />
-                    </NoDots>,
-                    <Divider inset />
-                  ]
-                )
-              }
-            </List>
+            <Scrollable innerRef={(panel) => { this.panel = panel; }}>
+              <List>
+                {
+                  this.state.chatHistory.map(
+                    ({ user, message, event }) => [
+                      <NoDots>
+                        <ListItem
+                          style={{ color: '#fafafa' }}
+                          leftAvatar={<Avatar src={user.image} />}
+                          primaryText={`${user.name} ${event || ''}`}
+                          secondaryText={
+                            message &&
+                            <OutputText>
+                              { message }
+                            </OutputText>
+                          }
+                        />
+                      </NoDots>,
+                      <Divider inset />
+                    ]
+                  )
+                }
+              </List>
+            </Scrollable>
             <InputPanel>
               <TextField
                 textareaStyle={{ color: '#fafafa' }}
