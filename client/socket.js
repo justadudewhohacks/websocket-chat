@@ -3,19 +3,11 @@ const io = require('socket.io-client')
 export default function () {
   const socket = io.connect('http://localhost:3000')
 
-  function registerHandlers({
-    onUserJoined,
-    onUserLeft,
-    onMessageReceived
-  }) {
-    socket.on('userJoined', onUserJoined)
-    socket.on('userLeft', onUserLeft)
+  function registerHandler(onMessageReceived) {
     socket.on('message', onMessageReceived)
   }
 
-  function unregisterHandlers() {
-    socket.off('userJoined')
-    socket.off('userLeft')
+  function unregisterHandler() {
     socket.off('message')
   }
 
@@ -55,8 +47,8 @@ export default function () {
     message,
     getChatrooms,
     getAvailableUsers,
-    registerHandlers,
-    unregisterHandlers
+    registerHandler,
+    unregisterHandler
   }
 }
 

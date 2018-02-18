@@ -98,8 +98,8 @@ export default class Root extends React.Component {
             cb
           )
         }
-        registerHandlers={this.state.client.registerHandlers}
-        unregisterHandlers={this.state.client.unregisterHandlers}
+        registerHandler={this.state.client.registerHandler}
+        unregisterHandler={this.state.client.unregisterHandler}
       />
     )
   }

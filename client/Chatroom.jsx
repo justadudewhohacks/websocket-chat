@@ -90,24 +90,12 @@ export default class Chatroom extends React.Component {
 
     this.onInput = this.onInput.bind(this)
     this.onSendMessage = this.onSendMessage.bind(this)
-    this.onUserJoined = this.onUserJoined.bind(this)
-    this.onUserLeft = this.onUserLeft.bind(this)
     this.onMessageReceived = this.onMessageReceived.bind(this)
     this.updateChatHistory = this.updateChatHistory.bind(this)
   }
 
   componentDidMount() {
-    const {
-      onUserJoined,
-      onUserLeft,
-      onMessageReceived
-    } = this
-
-    this.props.registerHandlers({
-      onUserJoined,
-      onUserLeft,
-      onMessageReceived
-    })
+    this.props.registerHandler(this.onMessageReceived)
   }
 
   componentDidUpdate() {
@@ -115,7 +103,7 @@ export default class Chatroom extends React.Component {
   }
 
   componentWillUnmount() {
-    this.props.unregisterHandlers()
+    this.props.unregisterHandler()
   }
 
   onInput(e) {
@@ -125,6 +113,9 @@ export default class Chatroom extends React.Component {
   }
 
   onSendMessage() {
+    if (!this.state.input)
+      return
+
     this.props.onSendMessage(this.state.input, (err) => {
       if (err)
         return console.error(err)
@@ -133,18 +124,9 @@ export default class Chatroom extends React.Component {
     })
   }
 
-  onUserJoined({ user }) {
-    this.updateChatHistory({ user, event: `joined ${this.props.chatroom.name}` })
-  }
-
-  onUserLeft({ user }) {
-    console.log('user left:', user)
-    this.updateChatHistory({ user, event: `left ${this.props.chatroom.name}` })
-  }
-
-  onMessageReceived({ user, message }) {
-    console.log('onMessageReceived:', user, message)
-    this.updateChatHistory({ user, message })
+  onMessageReceived(entry) {
+    console.log('onMessageReceived:', entry)
+    this.updateChatHistory(entry)
   }
 
   updateChatHistory(entry) {
@@ -181,9 +163,10 @@ export default class Chatroom extends React.Component {
               <List>
                 {
                   this.state.chatHistory.map(
-                    ({ user, message, event }) => [
+                    ({ user, message, event }, i) => [
                       <NoDots>
                         <ListItem
+                          key={i}
                           style={{ color: '#fafafa' }}
                           leftAvatar={<Avatar src={user.image} />}
                           primaryText={`${user.name} ${event || ''}`}
