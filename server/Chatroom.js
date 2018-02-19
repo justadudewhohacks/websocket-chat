@@ -6,8 +6,8 @@ module.exports = function ({ name, image }) {
     members.forEach(m => m.emit('message', message))
   }
 
-  function addEntry(user, entry) {
-    chatHistory = chatHistory.concat({ user, entry })
+  function addEntry(entry) {
+    chatHistory = chatHistory.concat(entry)
   }
 
   function getChatHistory() {

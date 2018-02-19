@@ -83,8 +83,10 @@ export default class Chatroom extends React.Component {
   constructor(props, context) {
     super(props, context)
 
+    const { chatHistory } = props
+
     this.state = {
-      chatHistory: [],
+      chatHistory,
       input: ''
     }
 
@@ -92,14 +94,16 @@ export default class Chatroom extends React.Component {
     this.onSendMessage = this.onSendMessage.bind(this)
     this.onMessageReceived = this.onMessageReceived.bind(this)
     this.updateChatHistory = this.updateChatHistory.bind(this)
+    this.scrollChatToBottom = this.scrollChatToBottom.bind(this)
   }
 
   componentDidMount() {
     this.props.registerHandler(this.onMessageReceived)
+    this.scrollChatToBottom()
   }
 
   componentDidUpdate() {
-    this.panel.scrollTo(0, this.panel.scrollHeight)
+    this.scrollChatToBottom()
   }
 
   componentWillUnmount() {
@@ -131,6 +135,10 @@ export default class Chatroom extends React.Component {
 
   updateChatHistory(entry) {
     this.setState({ chatHistory: this.state.chatHistory.concat(entry) })
+  }
+
+  scrollChatToBottom() {
+    this.panel.scrollTo(0, this.panel.scrollHeight)
   }
 
   render() {

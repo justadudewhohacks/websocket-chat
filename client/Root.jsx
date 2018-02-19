@@ -36,10 +36,10 @@ export default class Root extends React.Component {
     if (!this.state.user)
       return onNoUserSelected()
 
-    return this.state.client.join(chatroomName, (err) => {
+    return this.state.client.join(chatroomName, (err, chatHistory) => {
       if (err)
         return console.error(err)
-      return onEnterSuccess()
+      return onEnterSuccess(chatHistory)
     })
   }
 
@@ -81,9 +81,12 @@ export default class Root extends React.Component {
       return <Redirect to="/" />
     }
 
+    const { chatHistory } = history.location.state
+
     return (
       <Chatroom
         chatroom={chatroom}
+        chatHistory={chatHistory}
         user={this.state.user}
         onLeave={
           () => this.onLeaveChatroom(
@@ -129,7 +132,10 @@ export default class Root extends React.Component {
                               chatroomName => this.onEnterChatroom(
                                 chatroomName,
                                 () => props.history.push('/user'),
-                                () => props.history.push(chatroomName)
+                                chatHistory => props.history.push({
+                                  pathname: chatroomName,
+                                  state: { chatHistory }
+                                })
                               )
                             }
                           />
