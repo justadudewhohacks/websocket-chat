@@ -204,6 +204,7 @@ export default class Chatroom extends React.Component {
                 rowsMax={4}
                 onChange={this.onInput}
                 value={this.state.input}
+                onKeyPress={e => (e.key === 'Enter' ? this.onSendMessage() : null)}
               />
               <FloatingActionButton
                 onClick={this.onSendMessage}
